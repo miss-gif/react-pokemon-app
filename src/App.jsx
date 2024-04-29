@@ -1,16 +1,26 @@
-import React from "react";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const App = () => {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold underline">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam
-        obcaecati totam eos aliquid quos asperiores itaque, pariatur natus?
-        Ducimus reprehenderit maxime consequuntur quas omnis deleniti
-        praesentium ab ad veritatis quaerat.
-      </h1>
-    </div>
-  );
+  const [pokemons, setPokemons] = useState([]);
+
+  const url = "https://pokeapi.co/api/v2/pokemon/?limit=1008&offset=0";
+
+  useEffect(() => {
+    fetchPokeDate();
+  }, []);
+
+  const fetchPokeDate = async () => {
+    try {
+      const response = await axios.get(url);
+      console.log(response.data.results);
+      setPokemons(response.data.results);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return <div>App</div>;
 };
 
 export default App;
