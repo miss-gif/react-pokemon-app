@@ -1,6 +1,7 @@
 import axios from "axios"; // axios 라이브러리를 import 합니다.
 import { useState, useEffect } from "react"; // React의 useState와 useEffect 훅을 import 합니다.
 import PokeCard from "./components/PokeCard"; // PokeCard 컴포넌트를 import 합니다.
+import useDebounce from "./hooks/useDebounce";
 
 const App = () => {
   // 포켓몬 데이터를 저장할 상태 변수와 오프셋, 제한 값을 저장할 상태 변수를 정의합니다.
@@ -9,10 +10,17 @@ const App = () => {
   const [limit, setLimit] = useState(20);
   const [searchTerm, setSearchTerm] = useState(""); // 검색어를 저장할 상태 변수를 정의합니다.
 
+  // 커스텀 훅 사용으로 지연 검색
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   // 컴포넌트가 처음 렌더링될 때 포켓몬 데이터를 가져옵니다.
   useEffect(() => {
     fetchPokeDate(true);
   }, []);
+
+  useEffect(() => {
+    handleSearchInput(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   // 포켓몬 데이터를 가져오는 비동기 함수입니다.
   const fetchPokeDate = async (isFirstFetch) => {
@@ -31,14 +39,13 @@ const App = () => {
   };
 
   // 검색어를 처리하는 함수입니다.
-  const handleSearchInput = async (e) => {
-    setSearchTerm(e.target.value); // 검색어 상태를 업데이트합니다.
-    if (e.target.value.length > 0) {
+  const handleSearchInput = async (searchTerm) => {
+    if (searchTerm.length > 0) {
       // 검색어가 비어 있지 않으면
       try {
         // 검색어로 포켓몬 데이터를 가져옵니다.
         const response = await axios.get(
-          `http://pokeapi.co/api/v2/pokemon/${e.target.value}`
+          `http://pokeapi.co/api/v2/pokemon/${searchTerm}`
         );
         // 포켓몬 데이터를 설정합니다.
         const pokemonData = {
@@ -64,7 +71,9 @@ const App = () => {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={handleSearchInput} // 검색어가 변경될 때 handleSearchInput 함수를 호출합니다.
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }} // 검색어가 변경될 때 검색어 상태를 업데이트합니다.
                 placeholder="포켓몬을 검색하세요"
                 className="text-xs w-[20.5rem] h-6 px-2 py-1 bg-[hsl(214,13%,47%)] rounded-lg text-gray-300 text-center"
               />
