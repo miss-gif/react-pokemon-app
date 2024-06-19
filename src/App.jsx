@@ -7,8 +7,7 @@ const App = () => {
   const [pokemons, setPokemons] = useState([]);
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(20);
-  // 검색어 상태관리
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // 검색어를 저장할 상태 변수를 정의합니다.
 
   // 컴포넌트가 처음 렌더링될 때 포켓몬 데이터를 가져옵니다.
   useEffect(() => {
@@ -18,7 +17,7 @@ const App = () => {
   // 포켓몬 데이터를 가져오는 비동기 함수입니다.
   const fetchPokeDate = async (isFirstFetch) => {
     try {
-      // 첫번째 가져오기인지 확인하고, 첫번째면 offset을 0으로 설정합니다.
+      // 첫 번째 가져오기인지 확인하고, 첫 번째면 offset을 0으로 설정합니다.
       const offsetValue = isFirstFetch ? 0 : offset + limit;
       // PokeAPI에서 데이터를 가져오기 위한 URL을 만듭니다.
       const url = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=${offsetValue}`;
@@ -31,24 +30,28 @@ const App = () => {
     }
   };
 
+  // 검색어를 처리하는 함수입니다.
   const handleSearchInput = async (e) => {
-    setSearchTerm(e.target.value);
+    setSearchTerm(e.target.value); // 검색어 상태를 업데이트합니다.
     if (e.target.value.length > 0) {
+      // 검색어가 비어 있지 않으면
       try {
+        // 검색어로 포켓몬 데이터를 가져옵니다.
         const response = await axios.get(
           `http://pokeapi.co/api/v2/pokemon/${e.target.value}`
         );
+        // 포켓몬 데이터를 설정합니다.
         const pokemonData = {
           url: `http://pokeapi.co/api/v2/pokemon/${response.data.id}`,
           name: searchTerm,
         };
-        setPokemons([pokemonData]);
+        setPokemons([pokemonData]); // 검색 결과를 pokemons 상태에 설정합니다.
       } catch (error) {
-        setPokemons([]);
-        console.error(error);
+        setPokemons([]); // 검색 결과가 없을 경우, pokemons 상태를 빈 배열로 설정합니다.
+        console.error(error); // 에러가 발생하면 콘솔에 출력합니다.
       }
     } else {
-      fetchPokeDate(true);
+      fetchPokeDate(true); // 검색어가 비어 있으면 전체 포켓몬 데이터를 다시 가져옵니다.
     }
   };
 
@@ -61,7 +64,8 @@ const App = () => {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={handleSearchInput}
+                onChange={handleSearchInput} // 검색어가 변경될 때 handleSearchInput 함수를 호출합니다.
+                placeholder="포켓몬을 검색하세요"
                 className="text-xs w-[20.5rem] h-6 px-2 py-1 bg-[hsl(214,13%,47%)] rounded-lg text-gray-300 text-center"
               />
               <button
