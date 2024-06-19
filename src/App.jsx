@@ -57,7 +57,7 @@ const App = () => {
       <article className="pt-6">
         <header className="flex flex-col gap-2 w-full px-4 z-50">
           <div className="relative z-50">
-            <form className="relative flex justify-center items-center w[20.5rem] h-6 rounded-lg m-auto">
+            <form className="relative flex justify-center items-center w-[20.5rem] h-6 rounded-lg m-auto">
               <input
                 type="text"
                 value={searchTerm}
