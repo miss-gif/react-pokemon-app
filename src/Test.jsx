@@ -4,17 +4,10 @@ import PokeCard from "./components/PokeCard"; // PokeCard 컴포넌트를 import
 import useDebounce from "./hooks/useDebounce";
 
 const App = () => {
-  // 모든 포켓몬 데이터를 가지고 있는 State
-  const [allPokemons, setAllPokemons] = useState([]);
-
-  // 실제로 리스트로 보여주는 포켓몬 데이터를 가지고 있는 State
-  const [displayedPokemons, setDisplayedPokemons] = useState([]);
-
-  // 한번에 보여주는 포켓몬 수
-  const limitNum = 20;
-  // PokeAPI에서 데이터를 가져오기 위한 URL을 만듭니다.
-  const url = `https://pokeapi.co/api/v2/pokemon/?limit=1008&offset=0`;
-
+  // 포켓몬 데이터를 저장할 상태 변수와 오프셋, 제한 값을 저장할 상태 변수를 정의합니다.
+  const [pokemons, setPokemons] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(20);
   const [searchTerm, setSearchTerm] = useState(""); // 검색어를 저장할 상태 변수를 정의합니다.
 
   // 커스텀 훅 사용으로 지연 검색
@@ -22,33 +15,24 @@ const App = () => {
 
   // 컴포넌트가 처음 렌더링될 때 포켓몬 데이터를 가져옵니다.
   useEffect(() => {
-    fetchPokeData();
+    fetchPokeDate(true);
   }, []);
 
   useEffect(() => {
     handleSearchInput(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const filterDisplayedPokemonData = (
-    allPokemonsData,
-    displayedPokemons = []
-  ) => {
-    const limit = displayedPokemons.length + limitNum;
-    // 모든 포켓몬 데이터에서 limitNum 만큼 더 가져오기
-    const array = allPokemonsData.filter((pokemon, index) => index < limit);
-    return array;
-  };
-
   // 포켓몬 데이터를 가져오는 비동기 함수입니다.
-  const fetchPokeData = async () => {
+  const fetchPokeDate = async (isFirstFetch) => {
     try {
-      // 1008 포켓몬 데이터 받아오기
+      // 첫 번째 가져오기인지 확인하고, 첫 번째면 offset을 0으로 설정합니다.
+      const offsetValue = isFirstFetch ? 0 : offset + limit;
+      // PokeAPI에서 데이터를 가져오기 위한 URL을 만듭니다.
+      const url = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=${offsetValue}`;
       const response = await axios.get(url);
-
-      // 모든 포켓몬 데이터 기억하기
-      setAllPokemons(response.data.results);
-      // 실제로 화면에 출력되는 포켓몬 리스트
-      setDisplayedPokemons(filterDisplayedPokemonData(response.data.results));
+      // 새로운 포켓몬 데이터를 기존 데이터에 추가하고, offset을 업데이트합니다.
+      setPokemons([...pokemons, ...response.data.results]);
+      setOffset(offsetValue);
     } catch (error) {
       console.log(error); // 에러가 발생하면 콘솔에 출력합니다.
     }
@@ -68,13 +52,13 @@ const App = () => {
           url: `http://pokeapi.co/api/v2/pokemon/${response.data.id}`,
           name: searchTerm,
         };
-        setDisplayedPokemons([pokemonData]); // 검색 결과를 displayedPokemons 상태에 설정합니다.
+        setPokemons([pokemonData]); // 검색 결과를 pokemons 상태에 설정합니다.
       } catch (error) {
-        setDisplayedPokemons([]); // 검색 결과가 없을 경우, displayedPokemons 상태를 빈 배열로 설정합니다.
+        setPokemons([]); // 검색 결과가 없을 경우, pokemons 상태를 빈 배열로 설정합니다.
         console.error(error); // 에러가 발생하면 콘솔에 출력합니다.
       }
     } else {
-      fetchPokeData(); // 검색어가 비어 있으면 전체 포켓몬 데이터를 다시 가져옵니다.
+      fetchPokeDate(true); // 검색어가 비어 있으면 전체 포켓몬 데이터를 다시 가져옵니다.
     }
   };
 
@@ -104,9 +88,9 @@ const App = () => {
         </header>
         <section className="pt-6 flex flex-col justify-center items-center overflow-auto z-0">
           <div className="flex flex-row flex-wrap gap-[16px] items-center justify-center px-2 max-w-4xl">
-            {displayedPokemons.length > 0 ? (
+            {pokemons.length > 0 ? (
               // 포켓몬 데이터가 있을 경우, PokeCard 컴포넌트를 이용해 포켓몬을 표시합니다.
-              displayedPokemons.map(({ url, name }, index) => (
+              pokemons.map(({ url, name }, index) => (
                 <PokeCard key={url} url={url} name={name} />
               ))
             ) : (
@@ -118,20 +102,15 @@ const App = () => {
           </div>
         </section>
         <div className="text-center">
-          {allPokemons.length > displayedPokemons.length &&
-            allPokemons.length !== 1 && (
-              <button
-                className="bg-slate-800 px-6 py-2 my-4 text-base rounded-lg font-bold text-white"
-                // 더 많은 포켓몬 데이터를 가져오기 위해 버튼을 클릭하면 fetchPokeData 함수를 호출합니다.
-                onClick={() => {
-                  setDisplayedPokemons(
-                    filterDisplayedPokemonData(allPokemons, displayedPokemons)
-                  );
-                }}
-              >
-                더 보기
-              </button>
-            )}
+          <button
+            className="bg-slate-800 px-6 py-2 my-4 text-base rounded-lg font-bold text-white"
+            // 더 많은 포켓몬 데이터를 가져오기 위해 버튼을 클릭하면 fetchPokeDate 함수를 호출합니다.
+            onClick={() => {
+              fetchPokeDate(false);
+            }}
+          >
+            더 보기
+          </button>
         </div>
       </article>
     </>
