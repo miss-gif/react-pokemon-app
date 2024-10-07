@@ -37,7 +37,7 @@ const PokeCard = ({ url, name }) => {
     return PokeData;
   };
 
-  console.log("pokemon", pokemon);
+  // console.log("pokemon", pokemon);
 
   const bg = `bg-${pokemon?.types}`;
   const border = `border-${pokemon?.types}`;
