@@ -20,17 +20,53 @@ const DetailPage = () => {
 
       if (pokemonData) {
         // 가져온 데이터에서 필요한 정보만 구조 분해 할당으로 추출합니다.
-        const { name, id, types, weight, height, stats, abilties } =
+        const { name, id, types, weight, height, stats, abilities } =
           pokemonData;
 
         // 포켓몬의 다음과 이전 데이터를 가져오는 함수 호출
         const nextAndPrevPokemon = await getNextAndPrevPokemon(id);
         console.log("nextAndPrevPokemon", nextAndPrevPokemon); // 가져온 데이터를 콘솔에 출력합니다.
+
+        console.log(formatPokemonAbilities(abilities));
+
+        const formattedPokemonData = {
+          name,
+          id,
+          types,
+          weight: weight / 10,
+          height: height / 10,
+          stats: formatPokemonStats(stats),
+          abilities: formatPokemonAbilities(abilities),
+          next: nextAndPrevPokemon.next,
+          previous: nextAndPrevPokemon.previous,
+        };
       }
     } catch (error) {
       console.log(error); // 에러 발생 시 콘솔에 출력합니다.
     }
   };
+
+  const formatPokemonAbilities = (abilities) => {
+    return abilities
+      .filter((_, index) => index <= 1)
+      .map((obj) => obj.ability.name.replaceAll("-", " "));
+  };
+
+  const formatPokemonStats = ([
+    statHP,
+    statATK,
+    statDEP,
+    statSATK,
+    statSDEP,
+    statSPD,
+  ]) => [
+    { name: "Hip Points", baseStat: statHP.base_stat },
+    { name: "Attack", baseStat: statATK.base_stat },
+    { name: "Defense", baseStat: statDEP.base_stat },
+    { name: "Special Attack", baseStat: statSATK.base_stat },
+    { name: "Special Defense", baseStat: statSDEP.base_stat },
+    { name: "Speed", baseStat: statSPD.base_stat },
+  ];
 
   // 포켓몬의 이전/다음 데이터를 가져오는 비동기 함수입니다.
   const getNextAndPrevPokemon = async (id) => {
