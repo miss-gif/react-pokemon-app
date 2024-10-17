@@ -1,6 +1,9 @@
 import axios from "axios"; // axios를 사용해 API 호출을 처리합니다.
 import React, { useEffect, useState } from "react"; // useEffect를 통해 컴포넌트 렌더링 후 사이드 이펙트를 처리합니다.
-import { useParams } from "react-router-dom"; // useParams를 사용해 URL의 매개변수를 가져옵니다.
+import { Link, useParams } from "react-router-dom"; // useParams를 사용해 URL의 매개변수를 가져옵니다.
+import { Loading } from "../../assets/Loading";
+import { LessThan } from "../../assets/LessThan";
+import { GreaterThan } from "./../../assets/GreaterThan";
 
 const DetailPage = () => {
   const [pokemon, setPokemon] = useState();
@@ -49,6 +52,7 @@ const DetailPage = () => {
           next: nextAndPrevPokemon.next, // 다음 포켓몬 데이터
           previous: nextAndPrevPokemon.previous, // 이전 포켓몬 데이터
           DamageRelations, // 타입별 데미지 관계 데이터 배열
+          types: types.map((type) => type.type.name), // 타입 데이터 배열
         };
 
         setPokemon(formattedPokemonData); // 포켓몬 데이터를 상태에 저장합니다.
@@ -59,6 +63,7 @@ const DetailPage = () => {
       }
     } catch (error) {
       console.log(error); // 에러 발생 시 콘솔에 출력합니다.
+      setIsLoading(false); // 로딩 상태를 false로 변경합니다.
     }
   };
 
@@ -105,9 +110,44 @@ const DetailPage = () => {
     };
   };
 
-  if (isLoading) return <div>Loading...</div>; // 데이터를 불러오는 중이면 로딩 중을 표시합니다.
+  if (isLoading)
+    return (
+      <div className="absolute h-auto w-auto top-1/3 -translate-x-1/2 left-1/2 z-50">
+        <Loading className="w-12 h-12 z-50 animate-spin text-slate-900" />
+      </div>
+    ); // 데이터를 불러오는 중이면 로딩 중을 표시합니다.
 
-  return <div>DetailPage</div>; // DetailPage 컴포넌트를 렌더링합니다.
+  if (!isLoading && !pokemon) return <div>No Data</div>; // 데이터가 없으면 No Data를 표시합니다.
+
+  const img = `http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon?.id}.png`;
+  const bg = `bg-${pokemon?.types[0]}`;
+  const text = `text-${pokemon?.types[0]}`;
+
+  return (
+    <article className="flex items-center gap-1 flex-col w-full">
+      <div
+        className={`${bg} w-auto h-full flex flex-col z-0 items-center justify-end relative overflow-hidden`}
+      >
+        {pokemon.previous && (
+          <Link
+            to={`/pokemon/${pokemon.previous}`}
+            className="absolute top-[40%] -translate-y-1/2 z-50 left-1"
+          >
+            <LessThan className="w-5 h-8 p-1" />
+          </Link>
+        )}
+
+        {pokemon.next && (
+          <Link
+            to={`/pokemon/${pokemon.next}`}
+            className="absolute top-[40%] -translate-y-1/2 z-50 right-1"
+          >
+            <GreaterThan className="w-5 h-8 p-1" />
+          </Link>
+        )}
+      </div>
+    </article>
+  ); // DetailPage 컴포넌트를 렌더링합니다.
 };
 
 export default DetailPage;
