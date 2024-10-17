@@ -1,8 +1,11 @@
 import axios from "axios"; // axios를 사용해 API 호출을 처리합니다.
-import React, { useEffect } from "react"; // useEffect를 통해 컴포넌트 렌더링 후 사이드 이펙트를 처리합니다.
+import React, { useEffect, useState } from "react"; // useEffect를 통해 컴포넌트 렌더링 후 사이드 이펙트를 처리합니다.
 import { useParams } from "react-router-dom"; // useParams를 사용해 URL의 매개변수를 가져옵니다.
 
 const DetailPage = () => {
+  const [pokemon, setPokemon] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+
   const params = useParams(); // URL에서 전달된 파라미터를 추출합니다.
   const pokemonId = params.id; // 추출한 파라미터에서 포켓몬 ID를 가져옵니다.
   const baseUrl = "https://pokeapi.co/api/v2/pokemon/"; // API 기본 URL
@@ -25,21 +28,34 @@ const DetailPage = () => {
 
         // 포켓몬의 다음과 이전 데이터를 가져오는 함수 호출
         const nextAndPrevPokemon = await getNextAndPrevPokemon(id);
-        console.log("nextAndPrevPokemon", nextAndPrevPokemon); // 가져온 데이터를 콘솔에 출력합니다.
 
-        console.log(formatPokemonAbilities(abilities));
+        // 각 타입의 데미지 관계 데이터를 병렬로 가져옵니다.
+        const DamageRelations = await Promise.all(
+          types.map(async (i) => {
+            const type = await axios.get(i.type.url); // 각 타입의 데미지 관계를 가져옵니다.
+            return type.data.damage_relations; // 데미지 관계 데이터를 반환합니다.
+          })
+        );
 
+        // 가져온 포켓몬 데이터를 포맷팅하여 필요한 정보를 구조화합니다.
         const formattedPokemonData = {
           name,
           id,
           types,
-          weight: weight / 10,
-          height: height / 10,
-          stats: formatPokemonStats(stats),
-          abilities: formatPokemonAbilities(abilities),
-          next: nextAndPrevPokemon.next,
-          previous: nextAndPrevPokemon.previous,
+          weight: weight / 10, // kg 단위로 변환
+          height: height / 10, // m 단위로 변환
+          stats: formatPokemonStats(stats), // 포켓몬의 스탯을 포맷팅
+          abilities: formatPokemonAbilities(abilities), // 포켓몬의 능력을 포맷팅
+          next: nextAndPrevPokemon.next, // 다음 포켓몬 데이터
+          previous: nextAndPrevPokemon.previous, // 이전 포켓몬 데이터
+          DamageRelations, // 타입별 데미지 관계 데이터 배열
         };
+
+        setPokemon(formattedPokemonData); // 포켓몬 데이터를 상태에 저장합니다.
+        isLoading && setIsLoading(false); // 로딩 상태를 false로 변경합니다.
+
+        // 포켓몬 데이터를 콘솔에 출력합니다.
+        console.log("formattedPokemonData", formattedPokemonData);
       }
     } catch (error) {
       console.log(error); // 에러 발생 시 콘솔에 출력합니다.
@@ -88,6 +104,8 @@ const DetailPage = () => {
       previous: previousResponse?.data?.results?.[0]?.name,
     };
   };
+
+  if (isLoading) return <div>Loading...</div>; // 데이터를 불러오는 중이면 로딩 중을 표시합니다.
 
   return <div>DetailPage</div>; // DetailPage 컴포넌트를 렌더링합니다.
 };
