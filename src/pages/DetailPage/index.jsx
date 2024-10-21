@@ -1,20 +1,19 @@
-import axios from "axios"; // axios를 사용해 API 호출을 처리합니다.
-import React, { useEffect, useState } from "react"; // useEffect를 통해 컴포넌트 렌더링 후 사이드 이펙트를 처리합니다.
-import { Link, useParams } from "react-router-dom"; // useParams를 사용해 URL의 매개변수를 가져옵니다.
-import { Loading } from "../../assets/Loading";
-import { LessThan } from "../../assets/LessThan";
-import { GreaterThan } from "./../../assets/GreaterThan";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "../../assets/ArrowLeft";
-import { Balance } from "./../../assets/Balance";
-import { Vector } from "./../../assets/Vector";
-import Type from "../../components/Type";
-import BaseStat from "./../../components/BaseStat";
-import DamageRelations from "../../components/DamageRelations";
+import { LessThan } from "../../assets/LessThan";
+import { Loading } from "../../assets/Loading";
 import DamageModal from "../../components/DamageModal";
+import Type from "../../components/Type";
+import { Balance } from "./../../assets/Balance";
+import { GreaterThan } from "./../../assets/GreaterThan";
+import { Vector } from "./../../assets/Vector";
+import BaseStat from "./../../components/BaseStat";
 
 const DetailPage = () => {
   const [pokemon, setPokemon] = useState();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const params = useParams(); // URL에서 전달된 파라미터를 추출합니다.
@@ -23,11 +22,12 @@ const DetailPage = () => {
 
   // 컴포넌트가 마운트되었을 때 포켓몬 데이터를 가져오는 함수를 호출합니다.
   useEffect(() => {
-    fetchPokeDetailData(); // 데이터 가져오기 함수 호출
-  }, []); // 빈 배열을 두어 컴포넌트가 마운트될 때 한 번만 실행되게 합니다.
+    setIsLoading(true); // 로딩 상태를 true로 변경합니다.
+    fetchPokeDetailData(pokemonId); // 데이터 가져오기 함수 호출
+  }, [pokemonId]);
 
   // 포켓몬 상세 데이터를 가져오는 비동기 함수입니다.
-  const fetchPokeDetailData = async () => {
+  const fetchPokeDetailData = async (pokemonId) => {
     const url = `${baseUrl}${pokemonId}`; // 포켓몬 ID를 기반으로 API 엔드포인트 생성
     try {
       const { data: pokemonData } = await axios.get(url); // 포켓몬 데이터를 API로부터 가져옵니다.
@@ -64,13 +64,8 @@ const DetailPage = () => {
           description: await getPokemonDescription(id), // 포켓몬 설명 데이터
         };
 
-        console.log("formattedPokemonData", formattedPokemonData);
-
         setPokemon(formattedPokemonData); // 포켓몬 데이터를 상태에 저장합니다.
-        isLoading && setIsLoading(false); // 로딩 상태를 false로 변경합니다.
-
-        // 포켓몬 데이터를 콘솔에 출력합니다.
-        console.log("formattedPokemonData", formattedPokemonData);
+        setIsLoading(false);
       }
     } catch (error) {
       console.log(error); // 에러 발생 시 콘솔에 출력합니다.
