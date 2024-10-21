@@ -34,7 +34,7 @@ const DetailPage = () => {
 
       if (pokemonData) {
         // 가져온 데이터에서 필요한 정보만 구조 분해 할당으로 추출합니다.
-        const { name, id, types, weight, height, stats, abilities } =
+        const { name, id, types, weight, height, stats, abilities, sprites } =
           pokemonData;
 
         // 포켓몬의 다음과 이전 데이터를 가져오는 함수 호출
@@ -52,7 +52,6 @@ const DetailPage = () => {
         const formattedPokemonData = {
           name,
           id,
-          types,
           weight: weight / 10, // kg 단위로 변환
           height: height / 10, // m 단위로 변환
           stats: formatPokemonStats(stats), // 포켓몬의 스탯을 포맷팅
@@ -61,6 +60,7 @@ const DetailPage = () => {
           previous: nextAndPrevPokemon.previous, // 이전 포켓몬 데이터
           DamageRelations, // 타입별 데미지 관계 데이터 배열
           types: types.map((type) => type.type.name), // 타입 데이터 배열
+          sprites: formatPokemonSprites(sprites), // 포켓몬 이미지 데이터
         };
 
         setPokemon(formattedPokemonData); // 포켓몬 데이터를 상태에 저장합니다.
@@ -73,6 +73,18 @@ const DetailPage = () => {
       console.log(error); // 에러 발생 시 콘솔에 출력합니다.
       setIsLoading(false); // 로딩 상태를 false로 변경합니다.
     }
+  };
+
+  const formatPokemonSprites = (sprites) => {
+    const newSprites = {
+      ...sprites,
+    };
+    Object.keys(newSprites).forEach((key) => {
+      if (typeof newSprites[key] !== "string") {
+        delete newSprites[key];
+      }
+    });
+    return Object.values(newSprites);
   };
 
   const formatPokemonAbilities = (abilities) => {
@@ -232,14 +244,18 @@ const DetailPage = () => {
               </tbody>
             </table>
           </div>
-          {/* {pokemon.DamageRelations && (
-            <div className="w-10/12">
-              <h2 className={`text-base font-semibold ${text} text-center`}>
-                <DamageRelations damages={pokemon.DamageRelations} />
-              </h2>
-              데미지
-            </div>
-          )} */}
+          <div className="flex my-8 flex-wrap justify-center">
+            {pokemon.sprites.map((url, index) => {
+              return (
+                <img
+                  key={index}
+                  src={url}
+                  alt={pokemon.name}
+                  className="w-16 h-16"
+                />
+              );
+            })}
+          </div>
         </section>
       </div>
       {isModalOpen && (
