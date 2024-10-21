@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Type from "./Type";
 
 const DamageRelations = ({ damages }) => {
   // state로 변환된 데이터를 저장하는 변수
@@ -129,7 +130,43 @@ const DamageRelations = ({ damages }) => {
     return result;
   };
 
-  return <div>DamageRelations</div>; // UI 반환
+  return (
+    <div className="flex gap-2 flex-col">
+      {damagePokemonForm ? (
+        <>
+          {Object.entries(damagePokemonForm).map(([keyName, value]) => {
+            const key = keyName;
+            const valueOfKeyName = {
+              double_damage: "약점",
+              half_damage: "저항",
+              no_damage: "무효",
+            };
+
+            return (
+              <div key={key}>
+                <h3 className="capitalize font-medium text-sm md:text-base text-slate-500 text-center">
+                  {valueOfKeyName[key]}
+                </h3>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {value.length > 0 ? (
+                    value.map(({ name, url, damageValue }) => {
+                      return (
+                        <Type type={name} key={url} damageValue={damageValue} />
+                      );
+                    })
+                  ) : (
+                    <Type type={"none"} key={"none"} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <div></div>
+      )}
+    </div>
+  );
 };
 
 export default DamageRelations;
