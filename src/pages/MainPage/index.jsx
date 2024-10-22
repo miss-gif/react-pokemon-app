@@ -49,7 +49,7 @@ const MainPage = () => {
 
   return (
     <>
-      <article className="pt-6">
+      <article className="pt-[70px]">
         <header className="flex flex-col gap-2 w-full px-4 z-50">
           <AutoComplete
             allPokemons={allPokemons}
