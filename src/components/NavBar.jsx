@@ -1,23 +1,46 @@
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 import app from "./../../firebase";
 
 const NavBar = () => {
+  const navigate = useNavigate();
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const [show, setShow] = useState(false);
+  const [userData, setUserData] = useState({});
 
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/login");
+      } else if (user && pathname === "/login") {
+        navigate("/");
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const img = `http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/152.png`;
 
   const handleAuth = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(result);
+        setUserData(result.user);
+        console.log("user", result.user);
+        console.log(result.user.photoURL);
       })
       .catch((error) => {
         console.log(error);
@@ -38,6 +61,16 @@ const NavBar = () => {
       window.removeEventListener("scroll", listener);
     };
   }, []);
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        setUserData({});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <div
@@ -61,7 +94,23 @@ const NavBar = () => {
           Login
         </Link>
       ) : (
-        <></>
+        <div
+          className={classNames(
+            "relative h-[48px] w-[48px] flex cursor-pointer items-center justify-center group" // group 클래스를 추가
+          )}
+        >
+          <img
+            src={userData.photoURL}
+            alt="user photo"
+            className="w-full h-full rounded-full"
+          />
+          <span
+            className="absolute top-12 ring-0 bg-slate-400 rounded shadow p-2 text-xs tracking-[3px] w-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center text-white"
+            onClick={handleLogout}
+          >
+            logout
+          </span>
+        </div>
       )}
     </div>
   );

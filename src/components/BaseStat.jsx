@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-const BaseStat = ({ key, valueStat, nameStat, type }) => {
+const BaseStat = ({ valueStat, nameStat, type }) => {
   const bg = `bg-${type}`;
 
   const ref = useRef(null);
