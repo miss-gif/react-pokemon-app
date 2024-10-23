@@ -33,3 +33,9 @@
 
 - 결론:
   모바일에서 touchstart와 mousedown은 비슷하지만 동일하지 않습니다. 특히, 모바일 기기에서 터치스크린 상호작용을 보다 정확하게 처리하려면 touchstart를 사용하는 것이 더 적합합니다. 단, 중복 발생을 고려해 모바일에서는 touchstart를 사용하고, 데스크톱에서는 mousedown을 사용하는 방식으로 구분하는 것이 좋습니다.
+
+###### 파이어베이스 배포 중 에러 발생 및 해결 방법
+
+`Error: Failed to list Firebase projects. See firebase-debug.log for more info.` 에러 발생시
+
+터미널에 `firebase login --reauth` 입력 후 해결
