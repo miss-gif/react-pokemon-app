@@ -1,4 +1,3 @@
-import { all } from "axios";
 import React, { useState } from "react";
 import { PokemonNameAndUrl } from "../types/PokemonData";
 

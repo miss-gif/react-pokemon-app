@@ -2,9 +2,17 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import LazyImage from "./LazyImage";
+import { PokemonNameAndUrl } from "../types/PokemonData";
+import { PokemonDetail } from "../types/PokemonDetail";
 
-const PokeCard = ({ url, name }) => {
-  const [pokemon, setPokemon] = useState();
+interface PokeData {
+  id: number;
+  name: string;
+  types: string;
+}
+
+const PokeCard = ({ url, name }: PokemonNameAndUrl) => {
+  const [pokemon, setPokemon] = useState<PokeData>();
 
   useEffect(() => {
     // 포켓몬 데이터를 가져오는 함수 호출
@@ -28,9 +36,9 @@ const PokeCard = ({ url, name }) => {
   };
 
   // 포켓몬 데이터를 포맷화하는 함수 정의
-  const formatPokemonData = (params) => {
+  const formatPokemonData = (params: PokemonDetail) => {
     const { id, types, name } = params;
-    const PokeData = {
+    const PokeData: PokeData = {
       id,
       name,
       types: types[0].type.name,
