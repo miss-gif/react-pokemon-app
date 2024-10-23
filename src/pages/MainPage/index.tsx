@@ -2,13 +2,16 @@ import axios from "axios"; // axios 라이브러리를 import 합니다.
 import { useEffect, useState } from "react"; // React의 useState와 useEffect 훅을 import 합니다.
 import AutoComplete from "../../components/AutoComplete";
 import PokeCard from "../../components/PokeCard"; // PokeCard 컴포넌트를 import 합니다.
+import { PokemonData, PokemonNameAndUrl } from "../../types/PokemonData";
 
 const MainPage = () => {
   // 모든 포켓몬 데이터를 가지고 있는 State
-  const [allPokemons, setAllPokemons] = useState([]);
+  const [allPokemons, setAllPokemons] = useState<PokemonNameAndUrl[]>([]);
 
   // 실제로 리스트로 보여주는 포켓몬 데이터를 가지고 있는 State
-  const [displayedPokemons, setDisplayedPokemons] = useState([]);
+  const [displayedPokemons, setDisplayedPokemons] = useState<
+    PokemonNameAndUrl[]
+  >([]);
 
   // 한번에 보여주는 포켓몬 수
   const limitNum = 20;
@@ -21,14 +24,12 @@ const MainPage = () => {
   }, []);
 
   const filterDisplayedPokemonData = (
-    allPokemonsData,
-    displayedPokemons = []
+    allPokemonsData: PokemonNameAndUrl[],
+    displayedPokemons: PokemonNameAndUrl[] = []
   ) => {
     const limit = displayedPokemons.length + limitNum;
     // 모든 포켓몬 데이터에서 limitNum 만큼 더 가져오기
-    const array = allPokemonsData.filter(
-      (pokemon, index) => index + 1 <= limit
-    );
+    const array = allPokemonsData.filter((_, index) => index + 1 <= limit);
     return array;
   };
 
@@ -36,7 +37,7 @@ const MainPage = () => {
   const fetchPokeData = async () => {
     try {
       // 1008 포켓몬 데이터 받아오기
-      const response = await axios.get(url);
+      const response = await axios.get<PokemonData>(url);
 
       // 모든 포켓몬 데이터 기억하기
       setAllPokemons(response.data.results);
@@ -60,7 +61,7 @@ const MainPage = () => {
           <div className="flex flex-row flex-wrap gap-[16px] items-center justify-center px-2 max-w-4xl">
             {displayedPokemons.length > 0 ? (
               // 포켓몬 데이터가 있을 경우, PokeCard 컴포넌트를 이용해 포켓몬을 표시합니다.
-              displayedPokemons.map(({ url, name }, index) => (
+              displayedPokemons.map(({ url, name }: PokemonNameAndUrl) => (
                 <PokeCard key={url} url={url} name={name} />
               ))
             ) : (
