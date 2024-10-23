@@ -10,13 +10,15 @@ import {
 } from "firebase/auth";
 import app from "./../../firebase";
 
+const initalUserData = JSON.parse(localStorage.getItem("userData")) || {};
+
 const NavBar = () => {
   const navigate = useNavigate();
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const [show, setShow] = useState(false);
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState(initalUserData);
 
   const { pathname } = useLocation();
 
@@ -39,8 +41,7 @@ const NavBar = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
         setUserData(result.user);
-        console.log("user", result.user);
-        console.log(result.user.photoURL);
+        localStorage.setItem("userData", JSON.stringify(result.user));
       })
       .catch((error) => {
         console.log(error);
@@ -66,6 +67,7 @@ const NavBar = () => {
     signOut(auth)
       .then(() => {
         setUserData({});
+        localStorage.removeItem("userData"); // 로그아웃 시 로컬 스토리지에서도 유저 데이터 삭제
       })
       .catch((error) => {
         console.log(error);
