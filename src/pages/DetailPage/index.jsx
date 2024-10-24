@@ -6,10 +6,10 @@ import { LessThan } from "../../assets/LessThan";
 import { Loading } from "../../assets/Loading";
 import DamageModal from "../../components/DamageModal";
 import Type from "../../components/Type";
-import { Balance } from "./../../assets/Balance";
-import { GreaterThan } from "./../../assets/GreaterThan";
-import { Vector } from "./../../assets/Vector";
-import BaseStat from "./../../components/BaseStat";
+import { Balance } from "../../assets/Balance";
+import { GreaterThan } from "../../assets/GreaterThan";
+import { Vector } from "../../assets/Vector";
+import BaseStat from "../../components/BaseStat";
 
 const DetailPage = () => {
   const [pokemon, setPokemon] = useState();
@@ -44,6 +44,7 @@ const DetailPage = () => {
         const DamageRelations = await Promise.all(
           types.map(async (i) => {
             const type = await axios.get(i.type.url); // 각 타입의 데미지 관계를 가져옵니다.
+
             return type.data.damage_relations; // 데미지 관계 데이터를 반환합니다.
           })
         );
@@ -83,7 +84,6 @@ const DetailPage = () => {
   const getPokemonDescription = async (id) => {
     const url = `https://pokeapi.co/api/v2/pokemon-species/${id}/`;
     const { data: pokemonSpecies } = await axios.get(url);
-    console.log("pokemonSpecies", pokemonSpecies);
     const descriptions = filterAndFormatDescription(
       pokemonSpecies.flavor_text_entries
     );
