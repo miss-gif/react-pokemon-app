@@ -10,11 +10,9 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import app from "../../firebase";
+import storage from "../utils/storage";
 
-const userDataFromStorage = localStorage.getItem("userData");
-const initalUserData = userDataFromStorage
-  ? JSON.parse(userDataFromStorage)
-  : null;
+const initalUserData = storage.get<User>("userData");
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -45,7 +43,7 @@ const NavBar = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
         setUserData(result.user);
-        localStorage.setItem("userData", JSON.stringify(result.user));
+        storage.set("userData", result.user);
       })
       .catch((error) => {
         console.log(error);
@@ -70,8 +68,8 @@ const NavBar = () => {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
+        storage.remove("userData");
         setUserData(null);
-        localStorage.removeItem("userData"); // 로그아웃 시 로컬 스토리지에서도 유저 데이터 삭제
       })
       .catch((error) => {
         console.log(error);
