@@ -3,8 +3,11 @@ import NavBar from "./components/NavBar";
 import DetailPage from "./pages/DetailPage";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
+import { v4 } from "uuid";
 
 const Layout = () => {
+  console.log(v4());
+
   return (
     <>
       <NavBar />
