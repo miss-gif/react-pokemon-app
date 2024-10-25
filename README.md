@@ -16,7 +16,7 @@
 
 ---
 
-###### `mousedown`과 `touchstart` 차이
+## `mousedown`과 `touchstart` 차이
 
 1. touchstart
    모바일 전용: 터치스크린 장치(모바일, 태블릿)에서 손가락이 화면에 닿는 순간 발생합니다.
@@ -34,8 +34,35 @@
 - 결론:
   모바일에서 touchstart와 mousedown은 비슷하지만 동일하지 않습니다. 특히, 모바일 기기에서 터치스크린 상호작용을 보다 정확하게 처리하려면 touchstart를 사용하는 것이 더 적합합니다. 단, 중복 발생을 고려해 모바일에서는 touchstart를 사용하고, 데스크톱에서는 mousedown을 사용하는 방식으로 구분하는 것이 좋습니다.
 
-###### 파이어베이스 배포 중 에러 발생 및 해결 방법
+## 파이어베이스 배포 중 에러 발생 및 해결 방법
 
 `Error: Failed to list Firebase projects. See firebase-debug.log for more info.` 에러 발생시
 
 터미널에 `firebase login --reauth` 입력 후 해결
+
+## useRef의 Type 지정
+
+### **변수로 사용할 경우**
+
+`useRef`를 일반 변수로 사용하려는 경우, 제네릭 타입을 명시하여 초기 값을 설정할 수 있습니다. 타입을 지정할 때는 `useRef<타입>(초기값)` 형태로 작성합니다.
+
+```jsx
+// 숫자 타입의 ref 선언
+const countRef = useRef < number > 0;
+countRef.current += 1;
+```
+
+### **DOM 조작을 위한 경우**
+
+DOM 요소를 조작하기 위해 `useRef`를 사용하는 경우, 초기값을 `null`로 지정하고, `HTML` 요소 타입을 제네릭으로 지정합니다. 예를 들어 `HTMLDivElement`나 `HTMLInputElement` 등을 지정하여 타입 안전성을 확보할 수 있습니다.
+
+```jsx
+// <div> 요소 조작을 위한 ref 선언
+const divRef = useRef < HTMLDivElement > null;
+
+useEffect(() => {
+  if (divRef.current) {
+    divRef.current.style.backgroundColor = "lightblue";
+  }
+}, []);
+```
