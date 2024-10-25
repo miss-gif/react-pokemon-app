@@ -1,16 +1,20 @@
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+  User,
   getAuth,
-  signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
-import app from "./../../firebase";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import app from "../../firebase";
 
-const initalUserData = JSON.parse(localStorage.getItem("userData")) || {};
+const userDataFromStorage = localStorage.getItem("userData");
+const initalUserData = userDataFromStorage
+  ? JSON.parse(userDataFromStorage)
+  : null;
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -18,7 +22,7 @@ const NavBar = () => {
   const provider = new GoogleAuthProvider();
 
   const [show, setShow] = useState(false);
-  const [userData, setUserData] = useState(initalUserData);
+  const [userData, setUserData] = useState<User | null>(initalUserData);
 
   const { pathname } = useLocation();
 
@@ -66,7 +70,7 @@ const NavBar = () => {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        setUserData({});
+        setUserData(null);
         localStorage.removeItem("userData"); // 로그아웃 시 로컬 스토리지에서도 유저 데이터 삭제
       })
       .catch((error) => {
@@ -101,11 +105,13 @@ const NavBar = () => {
             "relative h-[48px] w-[48px] flex cursor-pointer items-center justify-center group" // group 클래스를 추가
           )}
         >
-          <img
-            src={userData.photoURL}
-            alt="user photo"
-            className="w-full h-full rounded-full"
-          />
+          {userData?.photoURL && (
+            <img
+              src={userData.photoURL}
+              alt="user photo"
+              className="w-full h-full rounded-full"
+            />
+          )}
           <span
             className="absolute top-12 ring-0 bg-slate-400 rounded shadow p-2 text-xs tracking-[3px] w-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center text-white"
             onClick={handleLogout}
