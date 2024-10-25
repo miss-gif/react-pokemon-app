@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { DamageRelations as DamageRelationsProps } from "../types/DamageRelationOfPokemonTypes";
 import Type from "./Type";
+import {
+  Damage,
+  DamageFromAndTo,
+  SeparateDamge,
+} from "../types/SeparateDamgeRelations";
 
-const DamageRelations = ({ damages }) => {
+interface DamageModalProps {
+  damages: DamageRelationsProps[];
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface Info {
+  name: string;
+  url: string;
+}
+
+const DamageRelations = ({ damages }: DamageModalProps) => {
   // state로 변환된 데이터를 저장하는 변수
-  const [damagePokemonForm, setDamagePokemonForm] = useState();
+  const [damagePokemonForm, setDamagePokemonForm] = useState<SeparateDamge>();
 
   useEffect(() => {
     // damages 배열의 각 damage 객체를 처리하여 분리된 데이터를 생성
@@ -22,7 +38,7 @@ const DamageRelations = ({ damages }) => {
   }, [damages]); // 의존성 배열에 damages 추가
 
   // arrayDamage의 'to'와 'from' 데이터를 결합하는 함수
-  const joinDamageRelations = (props) => {
+  const joinDamageRelations = (props: DamageFromAndTo[]): DamageFromAndTo => {
     return {
       to: joinObjects(props, "to"),
       from: joinObjects(props, "from"),
@@ -30,15 +46,18 @@ const DamageRelations = ({ damages }) => {
   };
 
   // 두 객체의 'to' 혹은 'from' 데이터를 병합하는 함수
-  const joinObjects = (props, key) => {
+  const joinObjects = (props: DamageFromAndTo[], string: string) => {
+    const key = string as keyof (typeof props)[0]; // 'to' 혹은 'from'을 key로 사용
     const firstArrayValue = props[0][key]; // 첫 번째 객체의 값을 가져옴
     const secondArrayValue = props[1][key]; // 두 번째 객체의 값을 가져옴
 
     // secondArrayValue의 각 항목을 순회하여 firstArrayValue와 병합
     const result = Object.entries(secondArrayValue).reduce(
-      (acc, [keyName, value]) => {
-        const firstValue = firstArrayValue[keyName] || []; // 첫 번째 객체에 해당 키가 없으면 빈 배열 사용
-        const concatenated = firstValue.concat(value); // 두 객체의 값을 병합
+      (acc, [keyName, value]: [string, Damage]) => {
+        const key = keyName as keyof typeof firstArrayValue; // keyName을 keyof로 변환
+
+        const firstValue = firstArrayValue[key] || []; // 첫 번째 객체에 해당 키가 없으면 빈 배열 사용
+        const concatenated = firstValue?.concat(value); // 두 객체의 값을 병합
         return { [keyName]: concatenated, ...acc };
       },
       {}
@@ -48,7 +67,7 @@ const DamageRelations = ({ damages }) => {
   };
 
   // 중복된 값을 합치는 함수
-  const reduceDuplicateValues = (props) => {
+  const reduceDuplicateValues = (props: SeparateDamge) => {
     const duplicateValues = {
       double_damage: "4x",
       half_damage: "1/4x",
@@ -57,17 +76,19 @@ const DamageRelations = ({ damages }) => {
 
     // 각 damage 값을 중복 처리 후 반환
     return Object.entries(props).reduce((acc, [keyName, value]) => {
-      const verifiedValue = filterForUniqueValues(
-        value,
-        duplicateValues[keyName]
-      );
+      const key = keyName as keyof typeof props;
+
+      const verifiedValue = filterForUniqueValues(value, duplicateValues[key]);
       return { [keyName]: verifiedValue, ...acc };
     }, {});
   };
 
   // 중복된 값을 걸러내는 함수
-  const filterForUniqueValues = (valueForFiltering, damageValue) => {
-    const array = [];
+  const filterForUniqueValues = (
+    valueForFiltering: Damage[],
+    damageValue: string
+  ) => {
+    const initialArray: Damage[] = [];
 
     // 각 damage 객체에서 중복을 제거하여 damage 값을 부여
     return valueForFiltering.reduce((acc, currentValue) => {
@@ -79,14 +100,16 @@ const DamageRelations = ({ damages }) => {
       // 중복이 없으면 새 값을 추가, 있으면 기존 값을 갱신
       return filterACC.length === acc.length
         ? [currentValue, ...acc]
-        : [{ DamageValut: damageValue, name, url }, ...filterACC];
-    }, []);
+        : [{ damageValue, name, url }, ...filterACC];
+    }, initialArray);
   };
 
   // 서버에 전송할 데이터를 가공하는 함수
-  const postDamageValue = (props) => {
+  const postDamageValue = (props: SeparateDamge): SeparateDamge => {
     // damage 종류에 따라 값을 매핑
     const result = Object.entries(props).reduce((acc, [keyName, value]) => {
+      const key = keyName as keyof typeof props;
+
       const valuesOfKeyName = {
         double_damage: "2x",
         half_damage: "1/2x",
@@ -95,8 +118,8 @@ const DamageRelations = ({ damages }) => {
 
       // 매핑된 값과 기존 값을 합쳐 새로운 객체 생성
       return {
-        [keyName]: value.map((i) => ({
-          damageValue: valuesOfKeyName[keyName], // damage type에 맞는 값 추가
+        [keyName]: value.map((i: Info[]) => ({
+          damageValue: valuesOfKeyName[key], // damage type에 맞는 값 추가
           ...i,
         })),
         ...acc,
@@ -108,7 +131,9 @@ const DamageRelations = ({ damages }) => {
   };
 
   // damage 객체에서 "_from"과 "_to" 데이터를 분리하는 함수
-  const separateObjectBetweenToAndFrom = (damage) => {
+  const separateObjectBetweenToAndFrom = (
+    damage: DamageRelationsProps
+  ): DamageFromAndTo => {
     const from = filterDamageRelations("_from", damage);
     const to = filterDamageRelations("_to", damage);
 
@@ -117,10 +142,13 @@ const DamageRelations = ({ damages }) => {
   };
 
   // "_from" 또는 "_to"로 필터링된 데이터를 반환하는 함수
-  const filterDamageRelations = (valueFilter, damage) => {
-    const result = Object.entries(damage)
-      .filter(([keyName]) => keyName.includes(valueFilter)) // 특정 패턴으로 필터링
-      .reduce((acc, [keyName, value]) => {
+  const filterDamageRelations = (
+    valueFilter: string,
+    damage: DamageRelationsProps
+  ) => {
+    const result: SeparateDamge = Object.entries(damage)
+      .filter(([keyName, _]) => keyName.includes(valueFilter)) // 특정 패턴으로 필터링
+      .reduce((acc, [keyName, value]): SeparateDamge => {
         // valueFilter를 키에서 제거하여 새로운 객체 생성
         const keyWithoutValueFilter = keyName.replace(valueFilter, "");
         return { [keyWithoutValueFilter]: value, ...acc };
@@ -135,7 +163,7 @@ const DamageRelations = ({ damages }) => {
       {damagePokemonForm ? (
         <>
           {Object.entries(damagePokemonForm).map(([keyName, value]) => {
-            const key = keyName;
+            const key = keyName as keyof typeof damagePokemonForm;
             const valueOfKeyName = {
               double_damage: "약점",
               half_damage: "저항",
@@ -149,7 +177,7 @@ const DamageRelations = ({ damages }) => {
                 </h3>
                 <div className="flex flex-wrap gap-1 justify-center">
                   {value.length > 0 ? (
-                    value.map(({ name, url, damageValue }) => {
+                    value.map(({ name, url, damageValue }: Damage) => {
                       return (
                         <Type type={name} key={url} damageValue={damageValue} />
                       );
