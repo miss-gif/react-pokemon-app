@@ -1,4 +1,3 @@
-import React from "react";
 import { ClassNameProps } from "../types/ClassNameProps";
 
 export const ArrowLeft = ({ className: CN = "" }: ClassNameProps) => (
